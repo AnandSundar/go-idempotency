@@ -1,4 +1,4 @@
-package idempotency
+package idempotency_test // Changed: external test package
 
 import (
 	"bytes"
@@ -7,13 +7,14 @@ import (
 	"testing"
 	"time"
 
+	"github.com/AnandSundar/go-idempotency" // Import as external
 	"github.com/AnandSundar/go-idempotency/store"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestMiddleware_CachesResponse(t *testing.T) {
 	s := store.NewMemoryStore()
-	handler := Middleware(s)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := idempotency.Middleware(s)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"success":true}`))
 	}))
@@ -44,7 +45,7 @@ func TestMiddleware_CachesResponse(t *testing.T) {
 func TestMiddleware_DifferentBodyGivesDifferentKey(t *testing.T) {
 	s := store.NewMemoryStore()
 	callCount := 0
-	handler := Middleware(s)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := idempotency.Middleware(s)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		callCount++
 		w.WriteHeader(http.StatusOK)
 		w.Write([]byte(`{"success":true}`))
@@ -68,7 +69,7 @@ func TestMiddleware_DifferentBodyGivesDifferentKey(t *testing.T) {
 
 func TestMiddleware_NoKeyPassesThrough(t *testing.T) {
 	s := store.NewMemoryStore()
-	handler := Middleware(s)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := idempotency.Middleware(s)(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
@@ -82,7 +83,7 @@ func TestMiddleware_NoKeyPassesThrough(t *testing.T) {
 
 func TestMiddleware_WithCustomTTL(t *testing.T) {
 	s := store.NewMemoryStore()
-	handler := Middleware(s, WithTTL(100*time.Millisecond))(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	handler := idempotency.Middleware(s, idempotency.WithTTL(100*time.Millisecond))(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 	}))
 
@@ -97,7 +98,9 @@ func TestMiddleware_WithCustomTTL(t *testing.T) {
 	time.Sleep(150 * time.Millisecond)
 
 	// Should process again (expired)
+	req2 := httptest.NewRequest(http.MethodPost, "/api/payment", bytes.NewBufferString(`{"amount":100}`))
+	req2.Header.Set("Idempotency-Key", "test-123")
 	rec2 := httptest.NewRecorder()
-	handler.ServeHTTP(rec2, req)
+	handler.ServeHTTP(rec2, req2)
 	assert.Empty(t, rec2.Header().Get("X-Idempotency-Cached"))
 }
