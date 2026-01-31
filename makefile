@@ -24,3 +24,6 @@ fmt:
 
 tidy:
 	go mod tidy
+
+run-example:
+	go run examples/server/main.go
