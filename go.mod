@@ -1,4 +1,4 @@
-module github.com/anandsundar/go-idempotency
+module github.com/AnandSundar/go-idempotency
 
 go 1.21
 

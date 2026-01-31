@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"time"
 
+	"github.com/AnandSundar/go-idempotency"
 	"github.com/redis/go-redis/v9"
-	"github.com/yourusername/go-idempotency"
 )
 
 // RedisStore is a Redis-backed implementation of Store

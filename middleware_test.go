@@ -7,8 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"github.com/AnandSundar/go-idempotency/store"
 	"github.com/stretchr/testify/assert"
-	"github.com/yourusername/go-idempotency/store"
 )
 
 func TestMiddleware_CachesResponse(t *testing.T) {
