@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/yourusername/go-idempotency"
-	"github.com/yourusername/go-idempotency/store"
+	"github.com/AnandSundar/go-idempotency"
+	"github.com/AnandSundar/go-idempotency/store"
 )
 
 type PaymentRequest struct {
